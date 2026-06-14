@@ -1,0 +1,39 @@
+# Repository Git Ignore Rules
+
+# Python / Backend
+backend/venv/
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/tests/__pycache__/
+backend/.pytest_cache/
+*.py[cod]
+*$py.class
+backend/oa_insight.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Node.js / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/.env*
+
+# IDE / Editors
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+Desktop.ini
