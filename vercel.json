@@ -3,16 +3,12 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": null,
-  "builds": [
-    {
-      "src": "backend/app/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "python3.12"
-      }
+  "functions": {
+    "backend/app/main.py": {
+      "maxLambdaSize": "50mb",
+      "runtime": "vercel-python@3.12"
     }
-  ],
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
