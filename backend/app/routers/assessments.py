@@ -280,7 +280,7 @@ def update_assessment(
     assessment = db.query(Assessment).filter(Assessment.id == assessment_id).first()
     if not assessment:
         raise HTTPException(
-            status_code=status.HTTP_444_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Assessment record not found"
         )
         

@@ -83,6 +83,12 @@ def generate_pdf_report(
         fontName='Helvetica-Bold'
     )
     
+    q_header_style = ParagraphStyle(
+        'QHeaderStyle',
+        parent=bold_body_style,
+        textColor=colors.white
+    )
+    
     recommendation_style = ParagraphStyle(
         'RecText',
         parent=body_style,
@@ -216,9 +222,9 @@ def generate_pdf_report(
     
     q_data = [
         [
-            Paragraph("<b>Clinical Score Metric</b>", bold_body_style),
-            Paragraph("<b>Computed Score</b>", bold_body_style),
-            Paragraph("<b>Clinical Interpretation (Standard)</b>", bold_body_style)
+            Paragraph("<b>Clinical Score Metric</b>", q_header_style),
+            Paragraph("<b>Computed Score</b>", q_header_style),
+            Paragraph("<b>Clinical Interpretation (Standard)</b>", q_header_style)
         ],
         [
             Paragraph("WOMAC Osteoarthritis Index", body_style),
@@ -258,10 +264,6 @@ def generate_pdf_report(
         ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_neutral]),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
-    # Quick fix for text color in header paragraph
-    for i in range(3):
-        q_data[0][i].style.textColor = colors.white
-        
     story.append(q_table)
     story.append(Spacer(1, 15))
     
