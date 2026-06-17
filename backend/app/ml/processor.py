@@ -182,7 +182,7 @@ class SignalProcessor:
         
         plt.tight_layout()
         signal_plot_path = os.path.join(output_dir, f"{prefix}_signals.png")
-        plt.savefig(signal_plot_path, dpi=150, bbox_inches='tight')
+        plt.savefig(signal_plot_path, dpi=100, bbox_inches='tight')
         plt.close()
         paths['signals'] = signal_plot_path
         
@@ -201,7 +201,7 @@ class SignalProcessor:
         plt.ylabel("Frequency (Hz)")
         plt.tight_layout()
         spec_plot_path = os.path.join(output_dir, f"{prefix}_spectrogram.png")
-        plt.savefig(spec_plot_path, dpi=150, bbox_inches='tight')
+        plt.savefig(spec_plot_path, dpi=100, bbox_inches='tight')
         plt.close()
         paths['spectrogram'] = spec_plot_path
         

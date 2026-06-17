@@ -3,7 +3,7 @@ import uuid
 import json
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,7 @@ processor = SignalProcessor()
 
 @router.post("/submit", response_model=AssessmentOut)
 async def submit_assessment(
+    background_tasks: BackgroundTasks,
     pain_score: int = Form(...),
     stiffness_score: int = Form(...),
     mobility_score: int = Form(...),
@@ -177,13 +178,14 @@ async def submit_assessment(
     db.add(new_questionnaire)
     db.commit()
     
-    # 7. Generate PDF Report
+    # 7. Generate PDF Report in background
     patient_record = db.query(User).filter(User.id == target_patient_id).first()
     pdf_filename = f"report_{new_assessment.id}.pdf"
     pdf_path = os.path.join(plot_dir, pdf_filename)
     
     try:
-        generate_pdf_report(
+        background_tasks.add_task(
+            generate_pdf_report,
             assessment=new_assessment,
             patient=patient_record,
             questionnaire=new_questionnaire,
@@ -192,10 +194,10 @@ async def submit_assessment(
             spec_plot_path=plots['spectrogram']
         )
     except Exception as e:
-        print(f"Error compiling PDF: {e}")
+        print(f"Error scheduling PDF compilation: {e}")
         # Not throwing HTTP error here since database records are saved successfully.
  
-    # Send email alert to patient
+    # Send email alert to patient in background
     try:
         subject = f"OA Insight - Knee Assessment Registered ({prediction['severity']})"
         html_content = f"""
@@ -211,9 +213,9 @@ async def submit_assessment(
         <br/>
         <p>Regards,<br/>OA Insight Diagnostics</p>
         """
-        send_email_notification(patient_record.email, subject, html_content)
+        background_tasks.add_task(send_email_notification, patient_record.email, subject, html_content)
     except Exception as email_err:
-        print(f"Failed to send submission email alert: {email_err}")
+        print(f"Failed to schedule submission email alert: {email_err}")
 
     # Fetch fresh assessment with relations populated
     result = db.query(Assessment).filter(Assessment.id == new_assessment.id).first()

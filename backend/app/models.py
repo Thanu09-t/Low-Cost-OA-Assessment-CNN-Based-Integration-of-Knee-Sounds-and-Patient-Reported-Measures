@@ -15,7 +15,7 @@ class User(Base):
     role = Column(String(20), nullable=False)  # "patient" or "doctor"
     dob = Column(String(20), nullable=True)     # YYYY-MM-DD
     gender = Column(String(20), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     # Relationships
     patient_assessments = relationship("Assessment", foreign_keys="Assessment.patient_id", back_populates="patient")
@@ -27,7 +27,7 @@ class Assessment(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     doctor_id = Column(String(36), ForeignKey("users.id"), nullable=True)
-    assessment_date = Column(DateTime, default=datetime.datetime.utcnow)
+    assessment_date = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     status = Column(String(20), default="completed")  # "pending", "completed"
     
     # Clinical metrics
@@ -45,7 +45,7 @@ class Assessment(Base):
     
     # Clinical output
     recommendations = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     # Relationships
     patient = relationship("User", foreign_keys=[patient_id], back_populates="patient_assessments")
@@ -68,7 +68,7 @@ class Questionnaire(Base):
     
     # Stores the full questionnaire response set
     raw_responses = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     # Relationship
     assessment = relationship("Assessment", back_populates="questionnaire")

@@ -26,8 +26,7 @@ class Settings(BaseSettings):
     # Resend Email Notification Integration API Key
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "re_HULvQS3G_jTzvEJJyMSFBgX6g8fKHtXgt")
     
-    class Config:
-        case_sensitive = True
+    model_config = {"case_sensitive": True}
 
 settings = Settings()
 

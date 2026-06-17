@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -265,6 +266,107 @@ def generate_pdf_report(
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
     story.append(q_table)
+    story.append(Spacer(1, 15))
+    
+    # --- Explainable AI (XAI) Model Attribution & Risk Drivers ---
+    xai_section = []
+    xai_section.append(Paragraph("Explainable AI (XAI) Model Attribution &amp; Risk Drivers", h1_style))
+    
+    # Extract XAI insights from questionnaire raw_responses
+    raw_responses = {}
+    if questionnaire and hasattr(questionnaire, 'raw_responses') and questionnaire.raw_responses:
+        if isinstance(questionnaire.raw_responses, str):
+            try:
+                raw_responses = json.loads(questionnaire.raw_responses)
+            except (json.JSONDecodeError, TypeError):
+                raw_responses = {}
+        elif isinstance(questionnaire.raw_responses, dict):
+            raw_responses = questionnaire.raw_responses
+    
+    xai_data = raw_responses.get("xai_insights", {})
+    clinical_pct = xai_data.get("clinical_contribution", 60)
+    acoustic_pct = xai_data.get("acoustic_contribution", 40)
+    risk_factors = xai_data.get("risk_factors", [])
+    
+    # -- XAI Contribution Ratio Bar --
+    xai_section.append(Paragraph("<b>Decision Source Contribution Ratio</b>", bold_body_style))
+    xai_section.append(Spacer(1, 4))
+    
+    # Calculate proportional column widths for stacked bar (total 7.5 inches)
+    total_bar_width = 7.5
+    clinical_width = max(0.5, round(total_bar_width * (clinical_pct / 100.0), 2))
+    acoustic_width = max(0.5, total_bar_width - clinical_width)
+    
+    clinical_bar_style = ParagraphStyle(
+        'ClinicalBar',
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        textColor=colors.white,
+        alignment=1
+    )
+    acoustic_bar_style = ParagraphStyle(
+        'AcousticBar',
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        textColor=colors.white,
+        alignment=1
+    )
+    
+    bar_data = [[
+        Paragraph(f"{round(clinical_pct)}% Clinical Survey", clinical_bar_style),
+        Paragraph(f"{round(acoustic_pct)}% Acoustic Signal", acoustic_bar_style)
+    ]]
+    
+    bar_table = Table(bar_data, colWidths=[clinical_width * inch, acoustic_width * inch])
+    bar_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, 0), primary_color),
+        ('BACKGROUND', (1, 0), (1, 0), secondary_color),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ROUNDEDCORNERS', [6, 6, 6, 6]),
+    ]))
+    xai_section.append(bar_table)
+    xai_section.append(Spacer(1, 10))
+    
+    # -- Risk Factors List --
+    if risk_factors:
+        xai_section.append(Paragraph("<b>Key Identified Severity Risk Factors</b>", bold_body_style))
+        xai_section.append(Spacer(1, 4))
+        
+        risk_bullet_style = ParagraphStyle(
+            'RiskBullet',
+            parent=body_style,
+            fontSize=9,
+            leading=13,
+            leftIndent=12,
+            bulletIndent=0,
+            bulletFontName='Helvetica-Bold',
+            bulletFontSize=9,
+            textColor=dark_neutral
+        )
+        
+        risk_rows = []
+        for factor in risk_factors:
+            risk_rows.append([
+                Paragraph("\u2022", ParagraphStyle('Bullet', fontName='Helvetica-Bold', fontSize=11, textColor=colors.HexColor('#EF4444'), alignment=1)),
+                Paragraph(factor, body_style)
+            ])
+        
+        risk_table = Table(risk_rows, colWidths=[0.3 * inch, 7.2 * inch])
+        risk_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('BACKGROUND', (0, 0), (-1, -1), light_neutral),
+            ('BOX', (0, 0), (-1, -1), 0.5, border_color),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, border_color),
+        ]))
+        xai_section.append(risk_table)
+    else:
+        xai_section.append(Paragraph("<i>No specific risk factors identified for this assessment.</i>", body_style))
+    
+    story.append(KeepTogether(xai_section))
     story.append(Spacer(1, 15))
     
     # --- Acoustic Analysis ---

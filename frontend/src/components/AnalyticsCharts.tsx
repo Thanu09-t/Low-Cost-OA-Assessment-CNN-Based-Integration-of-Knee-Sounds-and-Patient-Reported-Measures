@@ -38,7 +38,11 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
   distributionData = [],
   type = "patient"
 }) => {
-  
+  const scaledTrendData = trendData.map(d => ({
+    ...d,
+    pain: d.pain * 5
+  }));
+
   const COLORS = {
     "Normal": "#22C55E",      // Success
     "Mild OA": "#F59E0B",     // Warning
@@ -66,9 +70,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           </div>
           
           <div className="h-64 w-full">
-            {trendData.length > 0 ? (
+            {scaledTrendData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={scaledTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(226,232,240,0.15)" />
                   <XAxis dataKey="date" stroke="#94A3B8" fontSize={10} />
                   <YAxis domain={[0, 100]} stroke="#94A3B8" fontSize={10} />
@@ -122,9 +126,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           </div>
 
           <div className="h-64 w-full">
-            {trendData.length > 0 ? (
+            {scaledTrendData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={scaledTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(226,232,240,0.15)" />
                   <XAxis dataKey="date" stroke="#94A3B8" fontSize={10} />
                   <YAxis domain={[0, 100]} stroke="#94A3B8" fontSize={10} />

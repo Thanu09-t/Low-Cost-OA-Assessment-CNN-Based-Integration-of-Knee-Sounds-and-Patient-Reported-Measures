@@ -1,5 +1,6 @@
 import os
 import sys
+from contextlib import asynccontextmanager
 
 # Add backend directory to sys.path to resolve imports when running from project root (e.g., on Vercel)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -19,10 +20,16 @@ import datetime
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    seed_database()
+    yield
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Low-Cost Knee Osteoarthritis Assessment System API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Enable CORS for frontend requests
@@ -49,11 +56,67 @@ def read_root():
     return {
         "status": "online",
         "service": "OA Insight API",
-        "timestamp": datetime.datetime.utcnow().isoformat()
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
     }
 
 # --- Database Auto-Seeding ---
-@app.on_event("startup")
+def generate_seeded_signal_and_plots(file_name: str):
+    import numpy as np
+    from scipy.io import wavfile
+    from app.ml.processor import SignalProcessor
+    
+    signals_dir = os.path.join(settings.UPLOAD_DIR, "signals")
+    reports_dir = os.path.join(settings.UPLOAD_DIR, "reports")
+    os.makedirs(signals_dir, exist_ok=True)
+    os.makedirs(reports_dir, exist_ok=True)
+    
+    file_path = os.path.join(signals_dir, file_name)
+    prefix = file_name.split(".")[0]
+    
+    # Generate synthetic data
+    sr = 2000
+    duration = 2.0
+    t = np.linspace(0, duration, int(sr * duration), endpoint=False)
+    
+    # Base walking cycle movement (low frequency)
+    base_signal = 0.3 * np.sin(2 * np.pi * 3 * t)
+    
+    # Simulate friction/crepitus clicks based on severity/prefix
+    noise = np.random.normal(0, 0.08, len(t))
+    envelope = np.zeros_like(t)
+    
+    if prefix == "demo1": # Moderate OA
+        envelope[int(0.3*sr*duration):int(0.5*sr*duration)] = 1.2
+        envelope[int(1.3*sr*duration):int(1.5*sr*duration)] = 1.0
+    elif prefix == "demo2": # Moderate OA (slightly improved)
+        envelope[int(0.3*sr*duration):int(0.45*sr*duration)] = 0.8
+        envelope[int(1.3*sr*duration):int(1.45*sr*duration)] = 0.7
+    else: # Mild OA
+        envelope[int(0.4*sr*duration):int(0.45*sr*duration)] = 0.3
+        
+    crepitus = noise * envelope
+    raw_signal = base_signal + crepitus
+    
+    # Normalize
+    max_val = np.max(np.abs(raw_signal))
+    if max_val > 0:
+        raw_signal = raw_signal / max_val
+        
+    # Save as 16-bit WAV
+    pcm_signal = (raw_signal * 32767).astype(np.int16)
+    wavfile.write(file_path, sr, pcm_signal)
+    
+    # Generate and save plots
+    processor = SignalProcessor()
+    filtered_signal = processor.filter_noise(raw_signal, sr)
+    norm_signal = processor.normalize(filtered_signal)
+    spectrogram = processor.generate_spectrogram(norm_signal, sr)
+    
+    processor.generate_plots(
+        raw_signal, norm_signal, spectrogram, sr, 
+        reports_dir, prefix=prefix
+    )
+
 def seed_database():
     db = SessionLocal()
     try:
@@ -91,7 +154,7 @@ def seed_database():
             
             # 3. Create Sample Historical Assessments for Robert Miller
             # 1 Month Ago: Moderate OA
-            date_1 = datetime.datetime.utcnow() - datetime.timedelta(days=30)
+            date_1 = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30)
             ass_1 = Assessment(
                 patient_id=patient.id,
                 doctor_id=doctor.id,
@@ -109,7 +172,7 @@ def seed_database():
             db.add(ass_1)
             
             # 2 Weeks Ago: Moderate OA (Slight improvement in function)
-            date_2 = datetime.datetime.utcnow() - datetime.timedelta(days=14)
+            date_2 = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=14)
             ass_2 = Assessment(
                 patient_id=patient.id,
                 doctor_id=doctor.id,
@@ -127,7 +190,7 @@ def seed_database():
             db.add(ass_2)
             
             # Today: Mild OA (Further improvements)
-            date_3 = datetime.datetime.utcnow()
+            date_3 = datetime.datetime.now(datetime.timezone.utc)
             ass_3 = Assessment(
                 patient_id=patient.id,
                 doctor_id=doctor.id,
@@ -183,11 +246,13 @@ def seed_database():
             db.add_all([q_1, q_2, q_3])
             db.commit()
             
-            # Create placeholder empty files in upload directory so report generator doesn't crash on demo files
-            os.makedirs(os.path.join(settings.UPLOAD_DIR, "signals"), exist_ok=True)
+            # Generate real synthetic joint signals and plots for the demo assessments
+            print("Generating synthetic joint sounds and acoustic plots for demo patient...")
             for file_name in ["demo1.wav", "demo2.wav", "demo3.wav"]:
-                with open(os.path.join(settings.UPLOAD_DIR, "signals", file_name), "w") as f:
-                    f.write("placeholder signal data")
+                try:
+                    generate_seeded_signal_and_plots(file_name)
+                except Exception as seed_err:
+                    print(f"Error generating seeded plots for {file_name}: {seed_err}")
             
             print("Database seeding completed.")
     except Exception as e:

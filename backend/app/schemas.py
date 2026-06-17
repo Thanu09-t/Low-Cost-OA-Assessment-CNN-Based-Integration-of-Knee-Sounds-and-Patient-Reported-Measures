@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
@@ -22,8 +22,7 @@ class UserOut(UserBase):
     id: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Auth Schemas ---
 class Token(BaseModel):
@@ -55,8 +54,7 @@ class QuestionnaireOut(QuestionnaireBase):
     assessment_id: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Assessment Schemas ---
 class AssessmentBase(BaseModel):
@@ -85,8 +83,7 @@ class AssessmentOut(AssessmentBase):
     patient: Optional[UserOut] = None
     doctor: Optional[UserOut] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AssessmentUpdate(BaseModel):
     recommendations: str

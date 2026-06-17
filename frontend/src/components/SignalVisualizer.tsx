@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Activity, Disc, RefreshCw, ZoomIn } from 'lucide-react';
+import { API_HOST_URL } from '../api/client';
 
 interface SignalVisualizerProps {
   signalsPlotUrl?: string;
@@ -159,7 +160,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
                 </div>
                 <div className="relative group overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-950">
                   <img
-                    src={`http://localhost:8000${signalsPlotUrl}`}
+                    src={`${API_HOST_URL}${signalsPlotUrl}`}
                     alt="Raw & Processed Signal Graphs"
                     className="w-full h-auto object-cover transform transition duration-300 hover:scale-102"
                   />
@@ -177,7 +178,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
                 </div>
                 <div className="relative group overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-950">
                   <img
-                    src={`http://localhost:8000${spectrogramPlotUrl}`}
+                    src={`${API_HOST_URL}${spectrogramPlotUrl}`}
                     alt="Acoustic Spectrogram Heatmap"
                     className="w-full h-auto object-cover transform transition duration-300 hover:scale-102"
                   />
