@@ -1,22 +1,22 @@
 # OA Insight – Low-Cost Knee Osteoarthritis Assessment System
 
-**OA Insight** is a modern clinical decision-support system designed to assess Knee Osteoarthritis (OA) severity non-invasively and cost-effectively. It integrates **Knee Acoustic Emission (KAE)** signals captured via low-cost wearable vibration sensors with **Patient-Reported Measures (PRM)** surveys (such as WOMAC and KOOS). The system uses a **multimodal dual-branch Convolutional Neural Network (CNN)** to classify joints into Normal, Mild, Moderate, or Severe OA states.
+-**OA Insight** is a modern clinical decision-support system designed to assess Knee Osteoarthritis (OA) severity non-invasively and cost-effectively. It integrates **Knee Acoustic Emission (KAE)** signals captured via low-cost wearable vibration sensors with **Patient-Reported Measures (PRM)** surveys (such as WOMAC and KOOS). The system uses a **multimodal dual-branch Convolutional Neural Network (CNN)** to classify joints into Normal, Mild, Moderate, or Severe OA states.
 
 ---
 
 ## 🏥 Clinical & Technical Overview
 
-### 1. Knee Acoustic Emissions (KAE)
+-### 1. Knee Acoustic Emissions (KAE)
 Joint movement under loading triggers friction. While healthy cartilage articulates silently, osteoarthritic knees exhibit micro-acoustic bursts (clicks, crepitus, grinding sounds) caused by cartilage erosion, bone-on-bone contact, and synovial joint narrowing.
 * **Frequency Range**: Typically 50 Hz to 2000 Hz.
 * **Signal Pipeline**: Noise removal (50 Hz - 1000 Hz Butterworth bandpass) ➔ Peak amplitude normalization ➔ Cycle segmentation ➔ Short-Time Fourier Transform (STFT) Mel-spectrogram generation.
 
-### 2. Patient-Reported Measures (PRM)
+-### 2. Patient-Reported Measures (PRM)
 Standardized surveys capture subjective pain and functional limitations:
 * **WOMAC Score (Western Ontario & McMaster Universities OA Index)**: Sums Likert-scale answers across Pain (0-20), Stiffness (0-8), and Physical Function (0-68). A higher score represents worse symptoms.
-* **KOOS Score (Knee Injury & OA Outcome Score)**: Calculates normalized indices from 0 (extreme symptoms) to 100 (no symptoms).
-
-### 3. Multimodal CNN Fusion Architecture
+* **KOOS Score (Knee Injury & OA Outcome Score)**: Calculates normalized indices from 0 (extreme symptoms) to 100 (no symptoms)
+  
+-### 3. Multimodal CNN Fusion Architecture
 The network fuses heterogeneous clinical telemetry:
 * **Acoustic Branch**: ResNet-like 2D Convolutions processing the Mel-spectrogram image grid to extract frequency-domain transient anomalies.
 * **Survey Branch**: Dense layers embedding the patient's demographic factors and subscale scores.
