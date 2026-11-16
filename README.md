@@ -7,7 +7,7 @@
 ## 🏥 Clinical & Technical Overview
 
 ### 1. Knee Acoustic Emissions (KAE)
-Joint movement under loading triggers friction. While healthy cartilage articulates silently, osteoarthritic knees exhibit micro-acoustic bursts (clicks, crepitus, grinding sounds) caused by cartilage erosion, bone-on-bone contact, and synovial joint narrowing.
+Joint movement under loading triggers friction. While healthy cartilage articulates silently, osteoarthritic knees exhibit micro-acoustic bursts (clicks, crepitus, grinding sounds) caused by cartilage erosion, bone-on-bone contact, and synovial joint narrowing
 * **Frequency Range**: Typically 50 Hz to 2000 Hz.
 * **Signal Pipeline**: Noise removal (50 Hz - 1000 Hz Butterworth bandpass) ➔ Peak amplitude normalization ➔ Cycle segmentation ➔ Short-Time Fourier Transform (STFT) Mel-spectrogram generation
 
