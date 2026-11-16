@@ -44,7 +44,7 @@ This method launches both services in isolated containers. Persistent directorie
 ### Method B: Manual Local Setup (Zero-Docker Developer Mode)
 This method is useful for debugging. It utilizes the automatic **SQLite database fallback** and **ML NumPy simulation pipeline** if TensorFlow installation overhead is skipped.
 
-#### 1. Setup Backend Server
+#### 1. Setup Backend Server.
 1. Navigate to the backend directory:
    ```bash
    cd backend
